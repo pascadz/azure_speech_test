@@ -1,9 +1,13 @@
 # Connecting VoiceRAG to existing services
 
+> Quick start with TODO placeholders: See `docs/existing_resources.todo.env.sh`.
+> Fill all `TODO_...` values, run the commands, then run `azd up`.
+> This keeps OpenAI/Search on existing resources (`*_REUSE_EXISTING=true`).
+
 VoiceRAG can be connected to existing Azure services, such as Azure OpenAI and Azure Search. This guide will show you how to reuse existing services in your Azure subscription.
 
-* [Reuse existing OpenAI real-time deployment](#reuse-existing-openai-real-time-deployment)
-* [Reuse existing index from azure-search-openai-demo](#reuse-existing-index-from-azure-search-openai-demo)
+- [Reuse existing OpenAI real-time deployment](#reuse-existing-openai-real-time-deployment)
+- [Reuse existing index from azure-search-openai-demo](#reuse-existing-index-from-azure-search-openai-demo)
 
 ## Reuse existing OpenAI real-time deployment
 
@@ -11,27 +15,27 @@ Run these commands _before_ running `azd up`:
 
 1. Run this command to ensure that the [infrastructure](../infra/main.bicep) does not make a brand new OpenAI service:
 
-    ```bash
-    azd env set AZURE_OPENAI_REUSE_EXISTING true
-    ```
+   ```bash
+   azd env set AZURE_OPENAI_REUSE_EXISTING true
+   ```
 
 2. Run this command to ensure that the [infrastructure](../infra/main.bicep) assigns the proper RBAC roles for accessing the OpenAI resource:
 
-    ```bash
-    azd env set AZURE_OPENAI_RESOURCE_GROUP <YOUR_RESOURCE_GROUP>
-    ```
+   ```bash
+   azd env set AZURE_OPENAI_RESOURCE_GROUP <YOUR_RESOURCE_GROUP>
+   ```
 
 3. Run this command to point the app code at your Azure OpenAI endpoint:
 
-    ```bash
-    azd env set AZURE_OPENAI_ENDPOINT https://<YOUR_OPENAI_SERVICE>.openai.azure.com
-    ```
+   ```bash
+   azd env set AZURE_OPENAI_ENDPOINT https://<YOUR_OPENAI_SERVICE>.openai.azure.com
+   ```
 
 4. Run this command to point the app code at your Azure OpenAI real-time deployment. Note that the deployment name may be different from the model name:
 
-    ```bash
-    azd env set AZURE_OPENAI_REALTIME_DEPLOYMENT <YOUR_REALTIME_DEPLOYMENT_NAME>
-    ```
+   ```bash
+   azd env set AZURE_OPENAI_REALTIME_DEPLOYMENT <YOUR_REALTIME_DEPLOYMENT_NAME>
+   ```
 
 ## Reuse existing index from azure-search-openai-demo
 
@@ -40,42 +44,42 @@ Run these commands _before_ running `azd up`.
 
 1. Run this command to ensure that the [infrastructure](../infra/main.bicep) does not make a brand new Azure Search service:
 
-    ```bash
-    azd env set AZURE_SEARCH_REUSE_EXISTING true
-    ```
+   ```bash
+   azd env set AZURE_SEARCH_REUSE_EXISTING true
+   ```
 
 2. Run this command to ensure that the [infrastructure](../infra/main.bicep) assigns the proper RBAC roles for accessing the Azure Search resource:
 
-    ```bash
-    azd env set AZURE_SEARCH_SERVICE_RESOURCE_GROUP <YOUR_RESOURCE_GROUP>
-    ```
+   ```bash
+   azd env set AZURE_SEARCH_SERVICE_RESOURCE_GROUP <YOUR_RESOURCE_GROUP>
+   ```
 
 3. Run this command to point the app code at your Azure Search service:
 
-    ```bash
-    azd env set AZURE_SEARCH_ENDPOINT https://<YOUR_SEARCH_SERVICE>.search.windows.net
-    ```
+   ```bash
+   azd env set AZURE_SEARCH_ENDPOINT https://<YOUR_SEARCH_SERVICE>.search.windows.net
+   ```
 
 4. Run these commands to point the app code at the existing index and fields:
 
-    ```bash
-    azd env set AZURE_SEARCH_SEMANTIC_CONFIGURATION default
-    azd env set AZURE_SEARCH_IDENTIFIER_FIELD id
-    azd env set AZURE_SEARCH_CONTENT_FIELD content
-    azd env set AZURE_SEARCH_TITLE_FIELD sourcepage
-    azd env set AZURE_SEARCH_EMBEDDING_FIELD embedding
-    azd env set AZURE_SEARCH_REUSE_EXISTING true
-    azd env set AZURE_SEARCH_INDEX gptkbindex
-    ```
+   ```bash
+   azd env set AZURE_SEARCH_SEMANTIC_CONFIGURATION default
+   azd env set AZURE_SEARCH_IDENTIFIER_FIELD id
+   azd env set AZURE_SEARCH_CONTENT_FIELD content
+   azd env set AZURE_SEARCH_TITLE_FIELD sourcepage
+   azd env set AZURE_SEARCH_EMBEDDING_FIELD embedding
+   azd env set AZURE_SEARCH_REUSE_EXISTING true
+   azd env set AZURE_SEARCH_INDEX gptkbindex
+   ```
 
 5. (Optional) Run this command to disable vector search:
 
-    ```bash
-    azd env set AZURE_SEARCH_USE_VECTOR_QUERY false
-    ```
+   ```bash
+   azd env set AZURE_SEARCH_USE_VECTOR_QUERY false
+   ```
 
-    This variable is not needed if your search index has a built-in vectorizer,
-    which was added to the `azure-search-openai-demo` index setup in the October 17, 2024 release.
+   This variable is not needed if your search index has a built-in vectorizer,
+   which was added to the `azure-search-openai-demo` index setup in the October 17, 2024 release.
 
 ### Development server
 
