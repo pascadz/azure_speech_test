@@ -3,6 +3,7 @@
 > Quick start with TODO placeholders: See `docs/existing_resources.todo.env.sh`.
 > Fill all `TODO_...` values, run the commands, then run `azd up`.
 > This keeps OpenAI/Search on existing resources (`*_REUSE_EXISTING=true`).
+> In this repo variant, automatic PDF/index ingestion is disabled in `azure.yaml` (no `setup_intvect` in `postprovision`).
 
 VoiceRAG can be connected to existing Azure services, such as Azure OpenAI and Azure Search. This guide will show you how to reuse existing services in your Azure subscription.
 

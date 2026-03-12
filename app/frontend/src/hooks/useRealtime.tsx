@@ -8,12 +8,11 @@ import {
     ResponseAudioTranscriptDelta,
     ResponseDone,
     SessionUpdateCommand,
-    ExtensionMiddleTierToolResponse,
     ResponseInputAudioTranscriptionCompleted
 } from "@/types";
 
 type Parameters = {
-    useDirectAoaiApi?: boolean; // If true, the middle tier will be skipped and the AOAI ws API will be called directly
+    useDirectAoaiApi?: boolean;
     aoaiEndpointOverride?: string;
     aoaiApiKeyOverride?: string;
     aoaiModelOverride?: string;
@@ -27,7 +26,6 @@ type Parameters = {
     onReceivedResponseAudioDelta?: (message: ResponseAudioDelta) => void;
     onReceivedInputAudioBufferSpeechStarted?: (message: Message) => void;
     onReceivedResponseDone?: (message: ResponseDone) => void;
-    onReceivedExtensionMiddleTierToolResponse?: (message: ExtensionMiddleTierToolResponse) => void;
     onReceivedResponseAudioTranscriptDelta?: (message: ResponseAudioTranscriptDelta) => void;
     onReceivedInputAudioTranscriptionCompleted?: (message: ResponseInputAudioTranscriptionCompleted) => void;
     onReceivedError?: (message: Message) => void;
@@ -47,7 +45,6 @@ export default function useRealTime({
     onReceivedResponseAudioDelta,
     onReceivedResponseAudioTranscriptDelta,
     onReceivedInputAudioBufferSpeechStarted,
-    onReceivedExtensionMiddleTierToolResponse,
     onReceivedInputAudioTranscriptionCompleted,
     onReceivedError
 }: Parameters) {
@@ -125,9 +122,6 @@ export default function useRealTime({
                 break;
             case "conversation.item.input_audio_transcription.completed":
                 onReceivedInputAudioTranscriptionCompleted?.(message as ResponseInputAudioTranscriptionCompleted);
-                break;
-            case "extension.middle_tier_tool_response":
-                onReceivedExtensionMiddleTierToolResponse?.(message as ExtensionMiddleTierToolResponse);
                 break;
             case "error":
                 onReceivedError?.(message);

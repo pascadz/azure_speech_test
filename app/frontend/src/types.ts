@@ -1,15 +1,3 @@
-export type GroundingFile = {
-    id: string;
-    name: string;
-    content: string;
-};
-
-export type HistoryItem = {
-    id: string;
-    transcript: string;
-    groundingFiles: GroundingFile[];
-};
-
 export type SessionUpdateCommand = {
     type: "session.update";
     session: {
@@ -60,15 +48,4 @@ export type ResponseDone = {
         id: string;
         output: { id: string; content?: { transcript: string; type: string }[] }[];
     };
-};
-
-export type ExtensionMiddleTierToolResponse = {
-    type: "extension.middle_tier_tool.response";
-    previous_item_id: string;
-    tool_name: string;
-    tool_result: string; // JSON string that needs to be parsed into ToolResult
-};
-
-export type ToolResult = {
-    sources: { chunk_id: string; title: string; chunk: string }[];
 };
