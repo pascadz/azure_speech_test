@@ -26,7 +26,7 @@ param openAiEndpoint string = ''
 param openAiRealtimeDeployment string = ''
 param openAiRealtimeVoiceChoice string = ''
 
-@description('Location for the OpenAI resource group')
+@description('Location for the OpenAI resource group (only used when reuseExistingOpenAi=false)')
 @allowed([
   'eastus2'
   'swedencentral'
@@ -36,10 +36,10 @@ param openAiRealtimeVoiceChoice string = ''
     type: 'location'
   }
 })
-param openAiServiceLocation string
+param openAiServiceLocation string = 'eastus2'
 
-param realtimeDeploymentCapacity int
-param realtimeDeploymentVersion string
+param realtimeDeploymentCapacity int = 1
+param realtimeDeploymentVersion string = '2024-12-17'
 
 param tenantId string = tenant().tenantId
 
@@ -57,7 +57,7 @@ param runningOnGh string = ''
 param runningOnAdo string = ''
 
 @description('Used by azd for containerapps deployment')
-param webAppExists bool
+param webAppExists bool = false
 
 @allowed(['Consumption', 'D4', 'D8', 'D16', 'D32', 'E4', 'E8', 'E16', 'E32', 'NC24-A100', 'NC48-A100', 'NC96-A100'])
 param azureContainerAppsWorkloadProfile string
@@ -75,7 +75,9 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-resource openAiResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (!empty(openAiResourceGroupName)) {
+// Reference the resource group that holds (or will hold) the OpenAI resource.
+// Uses a separate RG when specified, otherwise falls back to the main resource group.
+resource openAiResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
   name: !empty(openAiResourceGroupName) ? openAiResourceGroupName : resourceGroup.name
 }
 
@@ -194,7 +196,9 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.8.0' = if (!reuseE
   }
 }
 
-// Role for the backend to access OpenAI
+// Role for the backend managed identity to access OpenAI (Cognitive Services OpenAI User).
+// Uses a deterministic GUID name so re-deployments are idempotent (no "already exists" error).
+// Always assigned, whether the OpenAI resource is new or existing.
 module openAiRoleBackend 'core/security/role.bicep' = {
   scope: openAiResourceGroup
   name: 'openai-role-backend'

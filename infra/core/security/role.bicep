@@ -11,6 +11,7 @@ param principalId string
 param principalType string = 'ServicePrincipal'
 param roleDefinitionId string
 
+// Using a deterministic name ensures idempotent re-deployments (no "already exists" error)
 resource role 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(subscription().id, resourceGroup().id, principalId, roleDefinitionId)
   properties: {
