@@ -11,8 +11,9 @@
         "conversationInProgress": "会話が進行中"
     },
     "history": {
-        "answerHistory": "回答履歴",
-        "noHistory": "まだ履歴はありません。"
+        "answerHistory": "会話",
+        "noHistory": "マイクボタンを押して会話を始めてください。",
+        "clear": "履歴をクリア"
     },
     "groundingFiles": {
         "title": "グラウンディング ファイル",

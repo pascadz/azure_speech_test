@@ -11,8 +11,9 @@
         "conversationInProgress": "Conversation in progress"
     },
     "history": {
-        "answerHistory": "Answer history",
-        "noHistory": "No history yet."
+        "answerHistory": "Conversation",
+        "noHistory": "Start a conversation by pressing the microphone button.",
+        "clear": "Clear history"
     },
     "groundingFiles": {
         "title": "Grounding files",

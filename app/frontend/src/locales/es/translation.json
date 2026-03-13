@@ -11,8 +11,9 @@
         "conversationInProgress": "Conversación en progreso"
     },
     "history": {
-        "answerHistory": "Historial de respuestas",
-        "noHistory": "Aún no hay historial."
+        "answerHistory": "Conversación",
+        "noHistory": "Inicia una conversación pulsando el botón del micrófono.",
+        "clear": "Borrar historial"
     },
     "groundingFiles": {
         "title": "Archivos de fundamentación",

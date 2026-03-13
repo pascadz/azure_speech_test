@@ -11,8 +11,9 @@
         "conversationInProgress": "Conversation en cours"
     },
     "history": {
-        "answerHistory": "Historique des réponses",
-        "noHistory": "Pas encore d'historique."
+        "answerHistory": "Conversation",
+        "noHistory": "Commencez une conversation en appuyant sur le bouton du microphone.",
+        "clear": "Effacer l'historique"
     },
     "groundingFiles": {
         "title": "Fichiers d'ancrage",
