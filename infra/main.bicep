@@ -26,6 +26,10 @@ param openAiEndpoint string = ''
 param openAiRealtimeDeployment string = ''
 param openAiRealtimeVoiceChoice string = ''
 
+@secure()
+@description('Optional: Azure OpenAI API Key. When set, API key auth is used instead of Managed Identity (no role assignments needed for OpenAI).')
+param openAiApiKey string = ''
+
 @description('Location for the OpenAI resource group (only used when reuseExistingOpenAi=false)')
 @allowed([
   'eastus2'
@@ -58,6 +62,9 @@ param runningOnAdo string = ''
 
 @description('Used by azd for containerapps deployment')
 param webAppExists bool = false
+
+@description('Skip role assignments if you lack Owner/User Access Administrator rights. You must then assign roles manually.')
+param skipRoleAssignments bool = false
 
 @allowed(['Consumption', 'D4', 'D8', 'D16', 'D32', 'E4', 'E8', 'E16', 'E32', 'NC24-A100', 'NC48-A100', 'NC96-A100'])
 param azureContainerAppsWorkloadProfile string
@@ -147,11 +154,13 @@ module acaBackend 'core/host/container-app-upsert.bicep' = {
       AZURE_OPENAI_ENDPOINT: reuseExistingOpenAi ? openAiEndpoint : openAi.outputs.endpoint
       AZURE_OPENAI_REALTIME_DEPLOYMENT: reuseExistingOpenAi ? openAiRealtimeDeployment : openAiDeployments[0].name
       AZURE_OPENAI_REALTIME_VOICE_CHOICE: openAiRealtimeVoiceChoice
+      AZURE_OPENAI_API_KEY: openAiApiKey
       // CORS support, for frontends on other hosts
       RUNNING_IN_PRODUCTION: 'true'
       // For using managed identity to access Azure resources
       AZURE_CLIENT_ID: acaIdentity.outputs.clientId
     }
+    skipRoleAssignments: skipRoleAssignments
   }
 }
 
@@ -186,7 +195,7 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.8.0' = if (!reuseE
     disableLocalAuth: true
     publicNetworkAccess: 'Enabled'
     networkAcls: {}
-    roleAssignments: [
+    roleAssignments: skipRoleAssignments ? [] : [
       {
         roleDefinitionIdOrName: 'Cognitive Services OpenAI User'
         principalId: principalId
@@ -197,9 +206,8 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.8.0' = if (!reuseE
 }
 
 // Role for the backend managed identity to access OpenAI (Cognitive Services OpenAI User).
-// Uses a deterministic GUID name so re-deployments are idempotent (no "already exists" error).
-// Always assigned, whether the OpenAI resource is new or existing.
-module openAiRoleBackend 'core/security/role.bicep' = {
+// Skipped when an API key is provided or when skipRoleAssignments=true.
+module openAiRoleBackend 'core/security/role.bicep' = if (!skipRoleAssignments && empty(openAiApiKey)) {
   scope: openAiResourceGroup
   name: 'openai-role-backend'
   params: {

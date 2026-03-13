@@ -81,6 +81,9 @@ param targetPort int = 80
 
 param workloadProfile string = 'Consumption'
 
+@description('Skip role assignments (ACR Pull). Set true if you lack permissions and will assign roles manually.')
+param skipRoleAssignments bool = false
+
 resource userIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = if (!empty(identityName)) {
   name: identityName
 }
@@ -102,7 +105,7 @@ var keyvaultIdentitySecrets = [for secret in items(keyvaultIdentities): {
   identity: secret.value.identity
 }] 
 
-module containerRegistryAccess '../security/registry-access.bicep' = if (usePrivateRegistry) {
+module containerRegistryAccess '../security/registry-access.bicep' = if (usePrivateRegistry && !skipRoleAssignments) {
   name: '${deployment().name}-registry-access'
   params: {
     containerRegistryName: containerRegistryName
@@ -110,7 +113,7 @@ module containerRegistryAccess '../security/registry-access.bicep' = if (usePriv
   }
 }
 
-resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
+resource app 'Microsoft.App/containerApps@2024-03-01' = {
   name: name
   location: location
   tags: tags
@@ -118,7 +121,7 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
   // otherwise the container app will throw a provision error
   // This also forces us to use an user assigned managed identity since there would no way to 
   // provide the system assigned identity with the ACR pull access before the app is created
-  dependsOn: usePrivateRegistry ? [ containerRegistryAccess ] : []
+  dependsOn: (usePrivateRegistry && !skipRoleAssignments) ? [ containerRegistryAccess ] : []
   identity: {
     type: normalizedIdentityType
     userAssignedIdentities: !empty(identityName) && normalizedIdentityType == 'UserAssigned' ? { '${userIdentity.id}': {} } : null
@@ -172,7 +175,7 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
   }
 }
 
-resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2023-05-01' existing = {
+resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
   name: containerAppsEnvironmentName
 }
 
