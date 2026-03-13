@@ -1,25 +1,47 @@
-# Stage 1: Build the Vite app
-FROM node:20-slim AS build-stage
+# ══════════════════════════════════════════════════════════════
+#  Multi-Stage Dockerfile: Frontend (Node) + Backend (Python)
+#  
+#  Nutzung mit Azure Container Apps:
+#    cd app/
+#    az containerapp up --name <app> --resource-group <rg> --source .
+#
+#  Der gesamte Build läuft in Azure (ACR) – lokal wird nichts gebaut.
+# ══════════════════════════════════════════════════════════════
 
-# Set the working directory inside the container
-COPY frontend ./
+# ── Stage 1: Frontend bauen (Node.js + Vite) ──
+FROM node:20-slim AS frontend-build
 
-WORKDIR /frontend
-RUN npm install
-RUN npm run build
+WORKDIR /build/frontend
+COPY frontend/package.json frontend/package-lock.json* ./
+RUN npm ci --no-audit --no-fund
 
-# Stage 2: Serve the built app with a static file server
-FROM python:3.12-slim AS production-stage
+# Restliche Frontend-Dateien kopieren & bauen
+COPY frontend/ ./
+# vite.config.ts: outDir = "../backend/static"  →  /build/backend/static/
+RUN npx vite build
+
+# ── Stage 2: Produktion (Python) ──
+FROM python:3.12-slim
 
 WORKDIR /app
-COPY --from=build-stage /backend/static /app/static
-COPY ./backend/ /app
+
+# Python-Deps zuerst (Layer-Caching)
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Backend-Code kopieren
+COPY backend/ .
+
+# Gebautes Frontend aus Stage 1 kopieren
+COPY --from=frontend-build /build/backend/static ./static
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-RUN python -m pip install -r requirements.txt
+EXPOSE 8000
 
-RUN python -m pip install gunicorn
-
-CMD ["python3", "-m", "gunicorn", "app:create_app", "-b", "0.0.0.0:8000", "--worker-class", "aiohttp.GunicornWebWorker"]
+CMD ["python", "-m", "gunicorn", "app:create_app", \
+    "--bind", "0.0.0.0:8000", \
+    "--worker-class", "aiohttp.GunicornWebWorker", \
+    "--timeout", "600", \
+    "--workers", "1"]

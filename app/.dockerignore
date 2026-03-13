@@ -1,9 +1,18 @@
-# Backend
-**/*.pyc
-**/.env
-
-## Will be built by multistage docker build
-**/static
-
-# Frontend
+# Dependencies & Build-Artefakte (werden im Container gebaut)
 **/node_modules
+**/static
+**/__pycache__
+**/*.pyc
+
+# Lokale Konfiguration
+**/.env
+**/.env.*
+!**/.env.example
+
+# Entwicklungsdateien
+**/.git
+**/.vscode
+**/Dockerfile
+**/.dockerignore
+**/README.md
+**/docs
